@@ -1,0 +1,12 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./bin/find_me_job ./cmd/find_me_job"
+bin = "./bin/find_me_job"
+full_bin = "bin/find_me_job"
+
+include_ext = ["go"]
+exclude_dir = ["tmp", "vendor", "bin"]
+delay = 1000
+stop_on_error = true
