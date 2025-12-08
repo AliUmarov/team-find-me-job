@@ -6,6 +6,10 @@ import (
 
 	"github.com/AliUmarov/team-find-me-job/internal/config"
 	"github.com/AliUmarov/team-find-me-job/internal/logger"
+	"github.com/AliUmarov/team-find-me-job/internal/models"
+	"github.com/AliUmarov/team-find-me-job/internal/repository"
+	"github.com/AliUmarov/team-find-me-job/internal/services"
+	"github.com/AliUmarov/team-find-me-job/internal/transport"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +19,7 @@ func main() {
 	config.SetEnv(log)
 	db := config.Connect(log)
 
-	if err := db.AutoMigrate(); err != nil {
+	if err := db.AutoMigrate(&models.Company{}); err != nil {
 		log.Error("failed to migrate database", "error", err)
 		os.Exit(1)
 	}
@@ -27,7 +31,13 @@ func main() {
 		port = "8080"
 	}
 
+	companyRepo := repository.NewCompanyRepository(db)
+
+	companyService := services.NewCompanyService(*companyRepo)
+
 	r := gin.Default()
+
+	transport.RegisterRoutes(r, *companyService)
 
 	log.Info("server started",
 		slog.String("addr", port))
