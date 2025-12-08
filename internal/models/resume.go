@@ -26,10 +26,10 @@ type ResumeCreateRequest struct {
 }
 
 type ResumeUpdateRequest struct {
-	Position   string `json:"position"`
-	Summary    string `json:"summart"`
-	Skills     string `json:"skills"`
-	Experience string `json:"experience"`
-	Portfolio  string `json:"portfolio"`
-	Salary     int    `json:"salary"`
+	Position   *string `json:"position"`
+	Summary    *string `json:"summart"`
+	Skills     *string `json:"skills"`
+	Experience *string `json:"experience"`
+	Portfolio  *string `json:"portfolio"`
+	Salary     *int    `json:"salary"`
 }
