@@ -27,7 +27,7 @@ type ResumeCreateRequest struct {
 
 type ResumeUpdateRequest struct {
 	Position   *string `json:"position"`
-	Summary    *string `json:"summart"`
+	Summary    *string `json:"summary"`
 	Skills     *string `json:"skills"`
 	Experience *string `json:"experience"`
 	Portfolio  *string `json:"portfolio"`
