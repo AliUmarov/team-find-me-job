@@ -6,7 +6,7 @@ type Resume struct {
 	gorm.Model
 
 	Position    string `json:"position"`
-	Summary     string `json:"summart"`
+	Summary     string `json:"summary"`
 	Skills      string `json:"skills"`
 	Experience  string `json:"experience"`
 	Portfolio   string `json:"portfolio"`
@@ -18,7 +18,7 @@ type Resume struct {
 
 type ResumeCreateRequest struct {
 	Position   string `json:"position"`
-	Summary    string `json:"summart"`
+	Summary    string `json:"summary"`
 	Skills     string `json:"skills"`
 	Experience string `json:"experience"`
 	Portfolio  string `json:"portfolio"`
