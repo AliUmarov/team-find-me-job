@@ -10,5 +10,4 @@ type Vacancy struct {
 	Salary      int
 	Rating      float64
 	CompanyID   uint
-	// Company     Company
 }
