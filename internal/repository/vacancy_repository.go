@@ -1,0 +1,47 @@
+package repository
+
+import (
+	"github.com/AliUmarov/team-find-me-job/internal/models"
+	"gorm.io/gorm"
+)
+
+type VacancyRepository interface {
+	Search(models.VacancyFilter) ([]models.Vacancy, error)
+	Create(*models.Vacancy) error
+	GetByCompanyId(uint64) ([]models.Vacancy, error)
+}
+
+type vacancyRepository struct {
+	db *gorm.DB
+}
+
+func NewVacancyRepository(db *gorm.DB) VacancyRepository {
+	return &vacancyRepository{db: db}
+}
+
+func (r *vacancyRepository) Search(filter models.VacancyFilter) ([]models.Vacancy, error) {
+	var vacancies []models.Vacancy
+	query := r.db.Model(&models.Vacancy{})
+	if filter.Title != nil {
+		query = query.Where("title ILIKE ?", "%"+*filter.Title+"%")
+	}
+	if err := query.Find(&vacancies).Error; err != nil {
+		return nil, err
+	}
+
+	return vacancies, nil
+}
+
+func (r *vacancyRepository) GetByCompanyId(id uint64) ([]models.Vacancy, error) {
+	var vacancies []models.Vacancy
+
+	if err := r.db.Where("company_id = ?", id).Find(&vacancies).Error; err != nil {
+		return nil, err
+	}
+
+	return vacancies, nil
+}
+
+func (r *vacancyRepository) Create(vacancy *models.Vacancy) error {
+	return r.db.Create(&vacancy).Error
+}
