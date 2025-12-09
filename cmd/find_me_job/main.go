@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/AliUmarov/team-find-me-job/internal/config"
-	"github.com/AliUmarov/team-find-me-job/internal/logger"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
@@ -14,7 +13,7 @@ import (
 )
 
 func main() {
-	log := logger.InitLogger()
+	log := config.InitLogger()
 
 	config.SetEnv(log)
 	db := config.Connect(log)
