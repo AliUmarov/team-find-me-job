@@ -10,7 +10,8 @@ import (
 type ResumeRepository interface {
 	Create(resume *models.Resume) error
 	GetAllResumes() ([]models.Resume, error)
-	Update(resume *models.Resume) error
+	GetByID(id uint) (*models.Resume, error)
+	Update(id uint, resume *models.Resume) error
 	Delete(id uint) error
 }
 
@@ -67,14 +68,35 @@ func (r *gormResumeRepository) GetAllResumes() ([]models.Resume, error) {
 	return resumes, nil
 }
 
-func (r *gormResumeRepository) Update(resume *models.Resume) error {
+func (r *gormResumeRepository) GetByID(id uint) (*models.Resume, error) {
+	op := "repo.resume.get_by_id"
+
+	r.logger.Debug("db call",
+		slog.String("op", op),
+	)
+
+	var resume models.Resume
+
+	if err := r.db.First(&resume, id).Error; err != nil {
+		r.logger.Error("db error",
+			slog.String("op", op),
+			slog.Any("error", err),
+		)
+		return nil, err
+	}
+
+	return &resume, nil
+
+}
+
+func (r *gormResumeRepository) Update(id uint, resume *models.Resume) error {
 	op := "repo.resume.update"
 
 	r.logger.Debug("db call",
 		slog.String("op", op),
 	)
 
-	if err := r.db.Updates(resume).Error; err != nil {
+	if err := r.db.Model(&models.Resume{}).Where("id = ?", id).Updates(resume).Error; err != nil {
 		r.logger.Error("db error",
 			slog.String("op", op),
 			slog.Any("error", err),
