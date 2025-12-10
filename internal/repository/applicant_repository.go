@@ -29,7 +29,7 @@ func NewApplicantRepository(db *gorm.DB, logger *slog.Logger) ApplicantRepositor
 
 func (r *ApplicantRepository) List() ([]models.Applicant, error) {
 	var applicants []models.Applicant
-	if err := r.db.Model(&applicants).Find(&applicants).Error; err != nil {
+	if err := r.db.Find(&applicants).Error; err != nil {
 		r.logger.Error("не удалось получить список соискателей",
 			slog.String("error", err.Error()),
 		)
@@ -59,7 +59,7 @@ func (r *ApplicantRepository) Create(applicant *models.Applicant) (*models.Appli
 
 func (r *ApplicantRepository) GetByID(id uint) (*models.Applicant, error) {
 	var applicant models.Applicant
-	if err := r.db.Model(&applicant).Where("id = ?", id).First(&applicant).Error; err != nil {
+	if err := r.db.Model(&applicant).First(&applicant, id).Error; err != nil {
 		r.logger.Error("не удалось получить соискателя",
 			slog.Uint64("id", uint64(id)),
 			slog.String("error", err.Error()),
@@ -74,8 +74,7 @@ func (r *ApplicantRepository) GetByID(id uint) (*models.Applicant, error) {
 }
 
 func (r *ApplicantRepository) Update(id uint, applicant *models.UpdateApplicant) (*models.Applicant, error) {
-	var existingApplicant models.Applicant
-	if err := r.db.Model(&existingApplicant).Where("id = ?", id).Updates(&applicant).Error; err != nil {
+	if err := r.db.Model(&models.Applicant{}).Where("id = ?", id).Updates(&applicant).Error; err != nil {
 		r.logger.Error("не удалось обновить соискателя",
 			slog.Uint64("id", uint64(id)),
 			slog.String("error", err.Error()),
@@ -84,9 +83,19 @@ func (r *ApplicantRepository) Update(id uint, applicant *models.UpdateApplicant)
 	}
 
 	r.logger.Info("соискатель успешно обновлен",
-		slog.Uint64("id", uint64(existingApplicant.ID)),
-		slog.String("full_name", existingApplicant.FullName),
+		slog.Uint64("id", uint64(id)),
+		slog.Any("updates", applicant),
 	)
+
+	var existingApplicant models.Applicant
+
+	if err := r.db.Model(&existingApplicant).First(&existingApplicant, id).Error; err != nil {
+		r.logger.Error("не удалось получить обновленного соискателя",
+			slog.Uint64("id", uint64(id)),
+			slog.String("error", err.Error()),
+		)
+		return &models.Applicant{}, err
+	}
 
 	return &existingApplicant, nil
 }
