@@ -8,6 +8,8 @@ type Company struct {
 	Website     string  `json:"website" gorm:"type:varchar(255);not null"`
 	Rating      float64 `json:"rating" gorm:"type:double precision"`
 	ReviewCount int     `json:"review_count"`
+
+	Vacancies []Vacancy `json:"-" gorm:"constraint:OnDelete:RESTRICT;"`
 }
 
 type CompanyCreateRequest struct {

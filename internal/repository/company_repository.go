@@ -5,15 +5,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type CompanyRepository struct {
+type CompanyRepository interface {
+	List() ([]models.Company, error)
+	Create(company *models.Company) error
+}
+
+type companyRepository struct {
 	db *gorm.DB
 }
 
-func NewCompanyRepository(db *gorm.DB) *CompanyRepository {
-	return &CompanyRepository{db: db}
+func NewCompanyRepository(db *gorm.DB) CompanyRepository {
+	return &companyRepository{db: db}
 }
 
-func (r *CompanyRepository) List() ([]models.Company, error) {
+func (r *companyRepository) List() ([]models.Company, error) {
 	var companies []models.Company
 	if err := r.db.Find(&companies).Error; err != nil {
 		return companies, err
@@ -22,6 +27,6 @@ func (r *CompanyRepository) List() ([]models.Company, error) {
 	return companies, nil
 }
 
-func (r *CompanyRepository) Create(company *models.Company) error {
+func (r *companyRepository) Create(company *models.Company) error {
 	return r.db.Create(&company).Error
 }
