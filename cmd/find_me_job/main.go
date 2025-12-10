@@ -32,12 +32,14 @@ func main() {
 	}
 
 	companyRepo := repository.NewCompanyRepository(db)
+	applicantRepo := repository.NewApplicantRepository(db, log)
 
 	companyService := services.NewCompanyService(*companyRepo)
+	applicantService := services.NewApplicantService(*applicantRepo, log)
 
 	r := gin.Default()
 
-	transport.RegisterRoutes(r, *companyService)
+	transport.RegisterRoutes(log, r, *companyService, *applicantService)
 
 	log.Info("server started",
 		slog.String("addr", port))

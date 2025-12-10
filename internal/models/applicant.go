@@ -1,18 +1,34 @@
 package models
 
-import "gorm.io/gorm"
-
 type Applicant struct {
-	gorm.Model
+	Base
 
 	FullName string
 	Email    string
 	Phone    string
 }
 
-type Application struct {
-	gorm.Model
+type CreateApplicant struct {
+	FullName string
+	Email    string
+	Phone    string
+}
 
+type UpdateApplicant struct {
+	FullName *string
+	Email    *string
+	Phone    *string
+}
+
+type Application struct {
+	Base
+
+	VacancyID   uint
+	ResumeID    uint
+	ApplicantID uint
+}
+
+type CreateApplication struct {
 	VacancyID   uint
 	ResumeID    uint
 	ApplicantID uint

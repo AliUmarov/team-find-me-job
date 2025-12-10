@@ -1,10 +1,16 @@
 package models
 
-import "gorm.io/gorm"
-
 type Vacancy struct {
-	gorm.Model
+	Base
 
+	Title       string
+	Description string
+	Salary      int
+	Rating      float64
+	CompanyID   uint
+}
+
+type CreateVacancy struct {
 	Title       string
 	Description string
 	Salary      int

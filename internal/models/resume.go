@@ -1,9 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 type Resume struct {
-	gorm.Model
+	Base
 
 	Position    string `json:"position"`
 	Summary     string `json:"summary"`
