@@ -19,15 +19,15 @@ type ApplicantService struct {
 	logger        *slog.Logger
 }
 
-func NewApplicantService(repo repository.ApplicantRepository, logger *slog.Logger) *ApplicantService {
-	return &ApplicantService{applicantRepo: repo, logger: logger}
+func NewApplicantService(repo repository.ApplicantRepository, logger *slog.Logger) ApplicantService {
+	return ApplicantService{applicantRepo: repo, logger: logger}
 }
 
 func (s *ApplicantService) List() ([]models.Applicant, error) {
 	applicants, err := s.applicantRepo.List()
 	if err != nil {
 		s.logger.Error("ошибка при получении списка соискателей",
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (s *ApplicantService) GetByID(id uint) (*models.Applicant, error) {
 	if err != nil {
 		s.logger.Error("ошибка при получении соискателя по ID",
 			slog.Uint64("id", uint64(id)),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
 		return &models.Applicant{}, err
 	}
@@ -71,7 +71,7 @@ func (s *ApplicantService) Update(id uint, applicant models.UpdateApplicant) (*m
 	if err != nil {
 		s.logger.Error("ошибка при обновлении соискателя",
 			slog.Uint64("id", uint64(id)),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
 		return &models.Applicant{}, err
 	}
@@ -82,7 +82,7 @@ func (s *ApplicantService) Delete(id uint) error {
 	if err := s.applicantRepo.Delete(id); err != nil {
 		s.logger.Error("ошибка при удалении соискателя",
 			slog.Uint64("id", uint64(id)),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
 		return err
 	}

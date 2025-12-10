@@ -13,7 +13,7 @@ import (
 
 type ApplicantHandler struct {
 	service services.ApplicantService
-	logger *slog.Logger
+	logger  *slog.Logger
 }
 
 func NewApplicantHandler(service services.ApplicantService, logger *slog.Logger) *ApplicantHandler {
@@ -35,9 +35,9 @@ func (h *ApplicantHandler) List(c *gin.Context) {
 	applicants, err := h.service.List()
 	if err != nil {
 		h.logger.Error("ошибка при получении списка соискателей",
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": constants.ERR_CAN_NOT_GET_APPLICANT})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_CAN_NOT_GET_APPLICANT})
 		return
 	}
 
@@ -54,17 +54,17 @@ func (h *ApplicantHandler) Create(c *gin.Context) {
 		h.logger.Warn("некорректный JSON",
 			slog.String("method", c.Request.Method),
 			slog.String("path", c.FullPath()),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": constants.ERR_INCORRECT_PAYLOAD})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INCORRECT_PAYLOAD})
 		return
 	}
 	applicant, err := h.service.Create(&req)
 	if err != nil {
 		h.logger.Error("ошибка при создании соискателя",
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": constants.ERR_CAN_NOT_CREATE_APPLICANT})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_CAN_NOT_CREATE_APPLICANT})
 		return
 	}
 
@@ -79,9 +79,9 @@ func (h *ApplicantHandler) GetByID(c *gin.Context) {
 	var id uint
 	if _, err := fmt.Sscan(idParam, &id); err != nil {
 		h.logger.Warn("некорректный ID",
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INCORRECT_ID})
 		return
 	}
 
@@ -89,9 +89,9 @@ func (h *ApplicantHandler) GetByID(c *gin.Context) {
 	if err != nil {
 		h.logger.Error("ошибка при получении соискателя по ID",
 			slog.Uint64("id", uint64(id)),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": constants.ERR_CAN_NOT_GET_APPLICANT})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_CAN_NOT_GET_APPLICANT})
 		return
 	}
 
@@ -106,9 +106,9 @@ func (h *ApplicantHandler) Update(c *gin.Context) {
 	var id uint
 	if _, err := fmt.Sscan(idParam, &id); err != nil {
 		h.logger.Warn("некорректный ID",
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INCORRECT_ID})
 		return
 	}
 
@@ -117,9 +117,9 @@ func (h *ApplicantHandler) Update(c *gin.Context) {
 		h.logger.Warn("некорректный JSON",
 			slog.String("method", c.Request.Method),
 			slog.String("path", c.FullPath()),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный JSON"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INCORRECT_PAYLOAD})
 		return
 	}
 
@@ -127,9 +127,9 @@ func (h *ApplicantHandler) Update(c *gin.Context) {
 	if err != nil {
 		h.logger.Error("ошибка при обновлении соискателя",
 			slog.Uint64("id", uint64(id)),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": constants.ERR_CAN_NOT_UPDATE_APPLICANT})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_CAN_NOT_UPDATE_APPLICANT})
 		return
 	}
 
@@ -146,21 +146,21 @@ func (h *ApplicantHandler) Delete(c *gin.Context) {
 		h.logger.Warn("некорректный ID",
 			slog.Any("error", err),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INCORRECT_ID})
 		return
 	}
 
 	if err := h.service.Delete(id); err != nil {
 		h.logger.Error("ошибка при удалении соискателя",
 			slog.Uint64("id", uint64(id)),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": constants.ERR_CAN_NOT_DELETE_APPLICANT})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_CAN_NOT_DELETE_APPLICANT})
 		return
 	}
 
 	h.logger.Info("соискатель успешно удален",
 		slog.Uint64("id", uint64(id)),
 	)
-	c.JSON(http.StatusOK, gin.H{"message": "соискатель успешно удален"})
+	c.JSON(http.StatusOK, gin.H{"message": constants.ERR_CAN_NOT_DELETE_APPLICANT})
 }

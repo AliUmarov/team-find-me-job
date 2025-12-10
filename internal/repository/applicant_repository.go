@@ -20,8 +20,8 @@ type ApplicantRepository struct {
 	logger *slog.Logger
 }
 
-func NewApplicantRepository(db *gorm.DB, logger *slog.Logger) *ApplicantRepository {
-	return &ApplicantRepository{
+func NewApplicantRepository(db *gorm.DB, logger *slog.Logger) ApplicantRepository {
+	return ApplicantRepository{
 		db:     db,
 		logger: logger,
 	}
@@ -31,7 +31,7 @@ func (r *ApplicantRepository) List() ([]models.Applicant, error) {
 	var applicants []models.Applicant
 	if err := r.db.Model(&applicants).Find(&applicants).Error; err != nil {
 		r.logger.Error("не удалось получить список соискателей",
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (r *ApplicantRepository) Create(applicant *models.Applicant) (*models.Appli
 	if err := r.db.Model(&applicant).Create(&applicant).Error; err != nil {
 		r.logger.Error("ошибка при создании соискателя",
 			slog.String("full_name", applicant.FullName),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
 		return &models.Applicant{}, err
 	}
@@ -62,7 +62,7 @@ func (r *ApplicantRepository) GetByID(id uint) (*models.Applicant, error) {
 	if err := r.db.Model(&applicant).Where("id = ?", id).First(&applicant).Error; err != nil {
 		r.logger.Error("не удалось получить соискателя",
 			slog.Uint64("id", uint64(id)),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
 		return &models.Applicant{}, err
 	}
@@ -78,7 +78,7 @@ func (r *ApplicantRepository) Update(id uint, applicant *models.UpdateApplicant)
 	if err := r.db.Model(&existingApplicant).Where("id = ?", id).Updates(&applicant).Error; err != nil {
 		r.logger.Error("не удалось обновить соискателя",
 			slog.Uint64("id", uint64(id)),
-			slog.Any("error", err),
+			slog.String("error", err.Error()),
 		)
 		return &models.Applicant{}, err
 	}
@@ -92,18 +92,8 @@ func (r *ApplicantRepository) Update(id uint, applicant *models.UpdateApplicant)
 }
 
 func (r *ApplicantRepository) Delete(id uint) error {
-	var existingApplicant models.Applicant
-	if err := r.db.Model(&existingApplicant).Where("id = ?", id).First(&existingApplicant).Error; err != nil {
-		r.logger.Error("не удалось найти соискателя для удаления",
-			slog.Uint64("id", uint64(id)),
-			slog.Any("error", err),
-		)
-		return err
-	}
-
-	r.logger.Info("соискатель успешно удален",
-		slog.Uint64("id", uint64(existingApplicant.ID)),
-		slog.String("full_name", existingApplicant.FullName),
+	r.logger.Info("удаление соискателя",
+		slog.Uint64("id", uint64(id)),
 	)
-	return r.db.Model(&existingApplicant).Delete(&existingApplicant).Error
+	return r.db.Model(&models.Applicant{}).Where("id = ?", id).Delete(&models.Applicant{}).Error
 }
