@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/AliUmarov/team-find-me-job/internal/config"
-	"github.com/AliUmarov/team-find-me-job/internal/logger"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
@@ -14,12 +13,12 @@ import (
 )
 
 func main() {
-	log := logger.InitLogger()
+	log := config.InitLogger()
 
 	config.SetEnv(log)
 	db := config.Connect(log)
 
-	if err := db.AutoMigrate(&models.Company{}, &models.Vacancy{}); err != nil {
+	if err := db.AutoMigrate(&models.Company{}, &models.Vacancy{}, &models.Resume{}); err != nil {
 		log.Error("failed to migrate database", "error", err)
 		os.Exit(1)
 	}
@@ -33,13 +32,16 @@ func main() {
 
 	companyRepo := repository.NewCompanyRepository(db)
 	vacancyRepo := repository.NewVacancyRepository(db)
+	resumeRepo := repository.NewResumeRepository(db, log)
 
+	resumeService := services.NewResumeService(resumeRepo, log)
 	companyService := services.NewCompanyService(companyRepo, vacancyRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)
 
 	r := gin.Default()
 
 	transport.RegisterRoutes(r, companyService, vacancyService)
+	transport.RegisterRoutes(r, log, *companyService, resumeService)
 
 	log.Info("server started",
 		slog.String("addr", port))
