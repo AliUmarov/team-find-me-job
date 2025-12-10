@@ -31,9 +31,11 @@ func main() {
 	}
 
 	companyRepo := repository.NewCompanyRepository(db)
+	applicantRepo := repository.NewApplicantRepository(db, log)
 	vacancyRepo := repository.NewVacancyRepository(db)
 	resumeRepo := repository.NewResumeRepository(db, log)
 
+	applicantService := services.NewApplicantService(applicantRepo, log)
 	resumeService := services.NewResumeService(resumeRepo, log)
 	companyService := services.NewCompanyService(companyRepo, vacancyRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)

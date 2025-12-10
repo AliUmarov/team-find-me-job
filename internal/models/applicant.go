@@ -1,19 +1,21 @@
 package models
 
-import "gorm.io/gorm"
-
 type Applicant struct {
-	gorm.Model
+	Base
 
-	FullName string
-	Email    string
-	Phone    string
+	FullName string `json:"full_name" gorm:"type:varchar(255);not null"`
+	Email    string `json:"email" gorm:"type:varchar(255);not null;uniqueIndex"`
+	Phone    string `json:"phone" gorm:"type:varchar(255);not null;uniqueIndex"`
 }
 
-type Application struct {
-	gorm.Model
+type CreateApplicant struct {
+	FullName string `json:"full_name"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+}
 
-	VacancyID   uint
-	ResumeID    uint
-	ApplicantID uint
+type UpdateApplicant struct {
+	FullName *string `json:"full_name"`
+	Email    *string `json:"email"`
+	Phone    *string `json:"phone"`
 }
