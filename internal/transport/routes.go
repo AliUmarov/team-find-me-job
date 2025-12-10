@@ -8,14 +8,17 @@ import (
 )
 
 func RegisterRoutes(
-	logger *slog.Logger,
 	router *gin.Engine,
+	logger *slog.Logger,
 	companyService services.CompanyService,
 	applicantService services.ApplicantService,
+	resumeService services.ResumeService,
 ) {
 	companyHandler := NewCompanyHandler(companyService)
+	resumeHandler := NewResumeHandler(resumeService, logger)
 	applicantHandler := NewApplicantHandler(applicantService, logger)
 
 	companyHandler.RegisterRoutes(router)
 	applicantHandler.RegisterRoutes(router)
+	resumeHandler.RegisterRoutes(router)
 }
