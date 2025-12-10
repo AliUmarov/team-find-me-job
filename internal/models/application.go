@@ -14,5 +14,4 @@ type Application struct {
 type CreateApplication struct {
 	VacancyID uint `json:"vacancy_id"`
 	ResumeID  uint `json:"resume_id"`
-	Resume   Resume `json:"resume"`
 }
