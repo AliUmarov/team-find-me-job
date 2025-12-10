@@ -8,7 +8,7 @@ type Vacancy struct {
 	Salary      int     `json:"salary" gorm:"type:int;not null"`
 	Rating      float64 `json:"rating" gorm:"type:float;not null"`
 	CompanyID   uint    `json:"company_id" gorm:"not null"`
-
+	
 	Company *Company `json:"-" gorm:"foreignKey:CompanyID"`
 }
 
