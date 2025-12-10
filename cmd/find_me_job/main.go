@@ -18,7 +18,7 @@ func main() {
 	config.SetEnv(log)
 	db := config.Connect(log)
 
-	if err := db.AutoMigrate(&models.Company{}, &models.Vacancy{}, &models.Resume{}); err != nil {
+	if err := db.AutoMigrate(&models.Applicant{}, &models.Application{}, &models.Vacancy{}, &models.Company{}, &models.Resume{}); err != nil {
 		log.Error("failed to migrate database", "error", err)
 		os.Exit(1)
 	}
