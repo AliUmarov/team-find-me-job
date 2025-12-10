@@ -9,7 +9,7 @@ type Company struct {
 	Rating      float64 `json:"rating" gorm:"type:double precision"`
 	ReviewCount int     `json:"review_count"`
 
-	Vacancies []Vacancy `json:"vacancies" gorm:"constraint:OnDelete:RESTRICT;"`
+	Vacancies []Vacancy `json:"-" gorm:"constraint:OnDelete:RESTRICT;"`
 }
 
 type CompanyCreateRequest struct {

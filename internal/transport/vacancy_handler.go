@@ -17,7 +17,7 @@ func NewVacancyHandler(service services.VacancyService) *VacancyHandler {
 }
 
 func (h *VacancyHandler) RegisterRoutes(r *gin.Engine) {
-	vacancy := r.Group("/vacancy")
+	vacancy := r.Group("/vacancies")
 	{
 		vacancy.GET("", h.Search)
 		vacancy.POST("", h.Create)

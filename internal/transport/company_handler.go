@@ -18,7 +18,7 @@ func NewCompanyHandler(service services.CompanyService) *CompanyHandler {
 }
 
 func (h *CompanyHandler) RegisterRoutes(r *gin.Engine) {
-	company := r.Group("/company")
+	company := r.Group("/companies")
 	{
 		company.GET("", h.List)
 		company.POST("", h.Create)
@@ -29,6 +29,10 @@ func (h *CompanyHandler) RegisterRoutes(r *gin.Engine) {
 func (h *CompanyHandler) GetVacanciesByCompanyId(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	companies, err := h.service.GetVacanciesByCompanyId(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
