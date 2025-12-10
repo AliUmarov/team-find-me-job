@@ -42,7 +42,7 @@ func main() {
 
 	r := gin.Default()
 
-	transport.RegisterRoutes(r, log, companyService, resumeService, vacancyService)
+	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService)
 
 	log.Info("server started",
 		slog.String("addr", port))
