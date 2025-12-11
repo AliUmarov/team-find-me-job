@@ -31,7 +31,7 @@ func (h *ResumeHandler) RegisterRoutes(r *gin.Engine) {
 		api.POST("/:id/improve", h.Improve)
 	}
 
-	r.POST("/applicants/:id/resumes", h.Create)
+	r.POST("/applicant/:id/resumes", h.Create)
 }
 
 func (h *ResumeHandler) Create(c *gin.Context) {
