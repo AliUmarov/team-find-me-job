@@ -14,8 +14,8 @@ func RegisterRoutes(
 	applicantService services.ApplicantService,
 	resumeService services.ResumeService,
 	vacancyService services.VacancyService,
-	authService services.AuthService,
 	applicationService services.ApplicationService,
+	authService services.AuthService,
 ) {
 	authHandler := NewAuthHandler(authService, logger)
 
