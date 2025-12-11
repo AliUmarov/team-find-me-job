@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/AliUmarov/team-find-me-job/internal/config"
+	"github.com/AliUmarov/team-find-me-job/internal/middlewares"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
@@ -34,6 +35,10 @@ func main() {
 	applicantRepo := repository.NewApplicantRepository(db, log)
 	vacancyRepo := repository.NewVacancyRepository(db)
 	resumeRepo := repository.NewResumeRepository(db, log)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
+
+	jwtService := services.NewJWTService()
+	authService := services.NewAuthService(applicantRepo, companyRepo, log, refreshTokenRepo, jwtService, db)
 
 	applicantService := services.NewApplicantService(applicantRepo, log)
 	resumeService := services.NewResumeService(resumeRepo, log)
@@ -41,8 +46,9 @@ func main() {
 	vacancyService := services.NewVacancyService(vacancyRepo)
 
 	r := gin.Default()
+	r.Use(middlewares.CORSMiddleware())
 
-	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService)
+	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService, authService)
 
 	log.Info("server started",
 		slog.String("addr", port))

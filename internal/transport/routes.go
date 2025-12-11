@@ -14,7 +14,10 @@ func RegisterRoutes(
 	applicantService services.ApplicantService,
 	resumeService services.ResumeService,
 	vacancyService services.VacancyService,
+	authService services.AuthService,
 ) {
+	authHandler := NewAuthHandler(authService, logger)
+
 	companyHandler := NewCompanyHandler(companyService)
 	resumeHandler := NewResumeHandler(resumeService, logger)
 	applicantHandler := NewApplicantHandler(applicantService, logger)
@@ -24,4 +27,6 @@ func RegisterRoutes(
 	applicantHandler.RegisterRoutes(router)
 	resumeHandler.RegisterRoutes(router)
 	vacancyHandler.RegisterRoutes(router)
+
+	authHandler.RegisterRoutes(router)
 }
