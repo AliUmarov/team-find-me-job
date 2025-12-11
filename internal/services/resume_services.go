@@ -145,7 +145,8 @@ Position: %s
 Summary: %s
 Skills: %s
 Experience: %s
-Portfolio: %s
+Portfolio: %s 
+
 Salary: %d
 `, resume.Position, resume.Summary, resume.Skills, resume.Experience, resume.Portfolio, resume.Salary)
 
