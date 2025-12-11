@@ -8,6 +8,8 @@ import (
 type ApplicationRepository interface {
 	Create(*models.Application) error
 	Applications(uint, models.ApplicationFilter) ([]models.Application, error)
+	AcceptApplication(appId uint) error
+	RejectApplication(appId uint) error
 }
 
 type applicationRepository struct {
@@ -16,6 +18,28 @@ type applicationRepository struct {
 
 func NewApplicationRepository(db *gorm.DB) ApplicationRepository {
 	return &applicationRepository{db: db}
+}
+
+func (r *applicationRepository) RejectApplication(appId uint) error {
+	if err := r.db.Model(&models.Application{}).
+		Where("id = ? AND status <> ?", appId, models.StatusRejected).
+		Update("status", models.StatusRejected).
+		Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *applicationRepository) AcceptApplication(appId uint) error {
+	if err := r.db.Model(&models.Application{}).
+		Where("id = ? AND status <> ?", appId, models.StatusAccepted).
+		Update("status", models.StatusAccepted).
+		Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *applicationRepository) Applications(id uint, filter models.ApplicationFilter) ([]models.Application, error) {

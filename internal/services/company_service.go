@@ -10,6 +10,8 @@ type CompanyService interface {
 	Create(models.CompanyCreateRequest) (*models.Company, error)
 	GetVacanciesByCompanyId(uint) ([]models.Vacancy, error)
 	Applications(uint, models.ApplicationFilter) ([]models.Application, error)
+	AcceptApplication(uint, uint) error
+	RejectApplication(uint, uint) error
 }
 
 type companyService struct {
@@ -28,6 +30,22 @@ func NewCompanyService(
 		vacancyRepo:     vacancyRepo,
 		applicationRepo: applicationRepo,
 	}
+}
+
+func (s *companyService) RejectApplication(companyId uint, appId uint) error {
+	_, err := s.companyRepo.Get(companyId)
+	if err != nil {
+		return err
+	}
+	return s.applicationRepo.RejectApplication(appId)
+}
+
+func (s *companyService) AcceptApplication(companyId uint, appId uint) error {
+	_, err := s.companyRepo.Get(companyId)
+	if err != nil {
+		return err
+	}
+	return s.applicationRepo.AcceptApplication(appId)
 }
 
 func (s *companyService) Applications(id uint, filter models.ApplicationFilter) ([]models.Application, error) {
