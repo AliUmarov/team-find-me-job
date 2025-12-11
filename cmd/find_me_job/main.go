@@ -18,7 +18,12 @@ func main() {
 	config.SetEnv(log)
 	db := config.Connect(log)
 
-	if err := db.AutoMigrate(&models.Company{}, &models.Vacancy{}, &models.Resume{}); err != nil {
+	if err := db.AutoMigrate(
+		&models.Company{},
+		&models.Vacancy{},
+		&models.Resume{},
+		&models.Application{},
+	); err != nil {
 		log.Error("failed to migrate database", "error", err)
 		os.Exit(1)
 	}
@@ -34,15 +39,17 @@ func main() {
 	applicantRepo := repository.NewApplicantRepository(db, log)
 	vacancyRepo := repository.NewVacancyRepository(db)
 	resumeRepo := repository.NewResumeRepository(db, log)
+	applicationRepo := repository.NewApplicationRepository(db)
 
 	applicantService := services.NewApplicantService(applicantRepo, log)
 	resumeService := services.NewResumeService(resumeRepo, log)
 	companyService := services.NewCompanyService(companyRepo, vacancyRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)
+	applicationService := services.NewApplicationService(applicationRepo, vacancyRepo, resumeRepo)
 
 	r := gin.Default()
 
-	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService)
+	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService, applicationService)
 
 	log.Info("server started",
 		slog.String("addr", port))
