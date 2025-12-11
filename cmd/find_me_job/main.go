@@ -10,16 +10,24 @@ import (
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
 	"github.com/AliUmarov/team-find-me-job/internal/transport"
+	"github.com/AliUmarov/team-find-me-job/internal/validators"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	log := config.InitLogger()
+	validators.RegisterValidators()
 
 	config.SetEnv(log)
 	db := config.Connect(log)
 
-	if err := db.AutoMigrate(&models.Applicant{}, &models.Application{}, &models.Vacancy{}, &models.Company{}, &models.Resume{}); err != nil {
+	if err := db.AutoMigrate(
+		&models.Applicant{},
+		&models.Application{},
+		&models.Vacancy{},
+		&models.Company{},
+		&models.Resume{},
+	); err != nil {
 		log.Error("failed to migrate database", "error", err)
 		os.Exit(1)
 	}
@@ -47,15 +55,17 @@ func main() {
 	applicantRepo := repository.NewApplicantRepository(db, log)
 	vacancyRepo := repository.NewVacancyRepository(db)
 	resumeRepo := repository.NewResumeRepository(db, log)
+	applicationRepo := repository.NewApplicationRepository(db)
 
 	applicantService := services.NewApplicantService(applicantRepo, log)
 	resumeService := services.NewResumeService(resumeRepo, log, gigaClient)
-	companyService := services.NewCompanyService(companyRepo, vacancyRepo)
+	companyService := services.NewCompanyService(companyRepo, vacancyRepo, applicationRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)
+	applicationService := services.NewApplicationService(applicationRepo, vacancyRepo, resumeRepo)
 
 	r := gin.Default()
 
-	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService)
+	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService, applicationService)
 
 	log.Info("server started",
 		slog.String("addr", port))

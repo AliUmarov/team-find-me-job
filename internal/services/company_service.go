@@ -8,25 +8,37 @@ import (
 type CompanyService interface {
 	List() ([]models.Company, error)
 	Create(models.CompanyCreateRequest) (*models.Company, error)
-	GetVacanciesByCompanyId(uint64) ([]models.Vacancy, error)
+	GetVacanciesByCompanyId(uint) ([]models.Vacancy, error)
+	Applications(uint, models.ApplicationFilter) ([]models.Application, error)
 }
 
 type companyService struct {
-	companyRepo repository.CompanyRepository
-	vacancyRepo repository.VacancyRepository
+	companyRepo     repository.CompanyRepository
+	vacancyRepo     repository.VacancyRepository
+	applicationRepo repository.ApplicationRepository
 }
 
 func NewCompanyService(
 	companyRepo repository.CompanyRepository,
 	vacancyRepo repository.VacancyRepository,
+	applicationRepo repository.ApplicationRepository,
 ) CompanyService {
 	return &companyService{
-		companyRepo: companyRepo,
-		vacancyRepo: vacancyRepo,
+		companyRepo:     companyRepo,
+		vacancyRepo:     vacancyRepo,
+		applicationRepo: applicationRepo,
 	}
 }
 
-func (s *companyService) GetVacanciesByCompanyId(id uint64) ([]models.Vacancy, error) {
+func (s *companyService) Applications(id uint, filter models.ApplicationFilter) ([]models.Application, error) {
+	_, err := s.companyRepo.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	return s.applicationRepo.Applications(id, filter)
+}
+
+func (s *companyService) GetVacanciesByCompanyId(id uint) ([]models.Vacancy, error) {
 	return s.vacancyRepo.GetByCompanyId(id)
 }
 

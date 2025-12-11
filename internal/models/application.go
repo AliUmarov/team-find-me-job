@@ -1,17 +1,31 @@
 package models
 
+type ApplicationStatus string
+
+const (
+	StatusPending  ApplicationStatus = "pending"
+	StatusReviewed ApplicationStatus = "reviewed"
+	StatusAccepted ApplicationStatus = "accepted"
+	StatusRejected ApplicationStatus = "rejected"
+)
+
 type Application struct {
 	Base
 
-	Status    string `json:"status" gorm:"type:varchar(100);not null;oneof('pending','reviewed','accepted','rejected');default:'pending'"`
-	VacancyID uint   `json:"vacancy_id" gorm:"not null"`
-	ResumeID  uint   `json:"resume_id" gorm:"not null"`
+	Status ApplicationStatus `json:"status" gorm:"type:varchar(100);not null;default:'pending'"`
 
-	Vacancy *Vacancy `json:"-" gorm:"foreignKey:VacancyID"`
-	Resume  *Resume  `json:"-" gorm:"foreignKey:ResumeID"`
+	VacancyID uint `json:"vacancy_id" gorm:"not null"`
+	ResumeID  uint `json:"resume_id" gorm:"not null"`
+
+	Vacancy *Vacancy `json:"vacancy,omitempty" gorm:"foreignKey:VacancyID"`
+	Resume  *Resume  `json:"resume,omitempty" gorm:"foreignKey:ResumeID"`
 }
 
 type CreateApplication struct {
-	VacancyID uint `json:"vacancy_id"`
-	ResumeID  uint `json:"resume_id"`
+	VacancyID uint `json:"vacancy_id" binding:"required"`
+	ResumeID  uint `json:"resume_id" binding:"required"`
+}
+
+type ApplicationFilter struct {
+	Status *ApplicationStatus `form:"status" binding:"omitempty,application_status"`
 }

@@ -14,7 +14,7 @@ type Vacancy struct {
 	NiceToHave       pq.StringArray `json:"nice_to_have" gorm:"type:text[];not null"`
 
 	CompanyID uint    `json:"company_id" binding:"required" gorm:"not null"`
-	Company   Company `json:"-"`
+	Company   *Company `json:"-"`
 }
 
 type VacancyCreateRequest struct {

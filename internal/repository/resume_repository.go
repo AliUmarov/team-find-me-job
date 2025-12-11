@@ -14,6 +14,7 @@ type ResumeRepository interface {
 	Save(resume *models.Resume) error
 	Update(id uint, resume *models.Resume) error
 	Delete(id uint) error
+	IsResumeExists(id uint) (bool, error)
 }
 
 type gormResumeRepository struct {
@@ -130,4 +131,13 @@ func (r *gormResumeRepository) Delete(id uint) error {
 	}
 
 	return nil
+}
+
+func (r *gormResumeRepository) IsResumeExists(id uint) (bool, error) {
+	var count int64
+	if err := r.db.Model(&models.Resume{}).Where("id = ?", id).Count(&count).Error; err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }
