@@ -23,11 +23,11 @@ func main() {
 	db := config.Connect(log)
 
 	if err := db.AutoMigrate(
+		&models.Company{},
+		&models.Vacancy{},
+		&models.Resume{},
 		&models.Applicant{},
 		&models.Application{},
-		&models.Vacancy{},
-		&models.Company{},
-		&models.Resume{},
 	); err != nil {
 		log.Error("failed to migrate database", "error", err)
 		os.Exit(1)
