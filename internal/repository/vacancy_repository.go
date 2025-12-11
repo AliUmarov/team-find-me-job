@@ -8,7 +8,7 @@ import (
 type VacancyRepository interface {
 	Search(models.VacancyFilter) ([]models.Vacancy, error)
 	Create(*models.Vacancy) error
-	GetByCompanyId(uint64) ([]models.Vacancy, error)
+	GetByCompanyId(uint) ([]models.Vacancy, error)
 	IsVacancyExists(id uint) (bool, error)
 }
 
@@ -33,7 +33,7 @@ func (r *vacancyRepository) Search(filter models.VacancyFilter) ([]models.Vacanc
 	return vacancies, nil
 }
 
-func (r *vacancyRepository) GetByCompanyId(id uint64) ([]models.Vacancy, error) {
+func (r *vacancyRepository) GetByCompanyId(id uint) ([]models.Vacancy, error) {
 	var vacancies []models.Vacancy
 
 	if err := r.db.Where("company_id = ?", id).Find(&vacancies).Error; err != nil {

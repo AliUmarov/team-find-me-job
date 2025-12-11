@@ -25,3 +25,7 @@ type CreateApplication struct {
 	VacancyID uint `json:"vacancy_id" binding:"required"`
 	ResumeID  uint `json:"resume_id" binding:"required"`
 }
+
+type ApplicationFilter struct {
+	Status *ApplicationStatus `form:"status" binding:"omitempty,application_status"`
+}

@@ -9,11 +9,13 @@ import (
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
 	"github.com/AliUmarov/team-find-me-job/internal/transport"
+	"github.com/AliUmarov/team-find-me-job/internal/validators"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	log := config.InitLogger()
+	validators.RegisterValidators()
 
 	config.SetEnv(log)
 	db := config.Connect(log)
@@ -44,7 +46,7 @@ func main() {
 
 	applicantService := services.NewApplicantService(applicantRepo, log)
 	resumeService := services.NewResumeService(resumeRepo, log)
-	companyService := services.NewCompanyService(companyRepo, vacancyRepo)
+	companyService := services.NewCompanyService(companyRepo, vacancyRepo, applicationRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)
 	applicationService := services.NewApplicationService(applicationRepo, vacancyRepo, resumeRepo)
 
