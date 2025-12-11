@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/AliUmarov/team-find-me-job/internal/config"
+	"github.com/AliUmarov/team-find-me-job/internal/gigachat"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
@@ -38,6 +39,18 @@ func main() {
 		port = "8080"
 	}
 
+	tokenProvider, err := gigachat.NewTokenProvider()
+	if err != nil {
+		log.Error("failed to init GigaChat TokenProvider", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	gigaClient, err := gigachat.NewClient(tokenProvider)
+	if err != nil {
+		log.Error("failed to init GigaChat client", slog.Any("error", err))
+		os.Exit(1)
+	}
+
 	companyRepo := repository.NewCompanyRepository(db)
 	applicantRepo := repository.NewApplicantRepository(db, log)
 	vacancyRepo := repository.NewVacancyRepository(db)
@@ -45,7 +58,7 @@ func main() {
 	applicationRepo := repository.NewApplicationRepository(db)
 
 	applicantService := services.NewApplicantService(applicantRepo, log)
-	resumeService := services.NewResumeService(resumeRepo, log)
+	resumeService := services.NewResumeService(resumeRepo, log, gigaClient)
 	companyService := services.NewCompanyService(companyRepo, vacancyRepo, applicationRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)
 	applicationService := services.NewApplicationService(applicationRepo, vacancyRepo, resumeRepo)

@@ -11,6 +11,7 @@ type ResumeRepository interface {
 	Create(resume *models.Resume) error
 	GetAllResumes() ([]models.Resume, error)
 	GetByID(id uint) (*models.Resume, error)
+	Save(resume *models.Resume) error
 	Update(id uint, resume *models.Resume) error
 	Delete(id uint) error
 	IsResumeExists(id uint) (bool, error)
@@ -88,6 +89,10 @@ func (r *gormResumeRepository) GetByID(id uint) (*models.Resume, error) {
 
 	return &resume, nil
 
+}
+
+func (r *gormResumeRepository) Save(resume *models.Resume) error {
+	return r.db.Save(resume).Error
 }
 
 func (r *gormResumeRepository) Update(id uint, resume *models.Resume) error {
