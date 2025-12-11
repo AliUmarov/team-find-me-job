@@ -141,13 +141,14 @@ func (s *resumeService) ImproveResume(id uint) (*models.Resume, error) {
 	}
 
 	fullText := fmt.Sprintf(`
-Position: %s
-Summary: %s
-Skills: %s
-Experience: %s
-Portfolio: %s
-Salary: %d
-`, resume.Position, resume.Summary, resume.Skills, resume.Experience, resume.Portfolio, resume.Salary)
+		Position: %s
+		Summary: %s
+		Skills: %s
+		Experience: %s
+		Portfolio: %s 
+
+		Salary: %d
+	`, resume.Position, resume.Summary, resume.Skills, resume.Experience, resume.Portfolio, resume.Salary)
 
 	improved, score, err := gigachat.ImproveResume(fullText, s.client)
 	if err != nil {
