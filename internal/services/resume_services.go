@@ -1,8 +1,10 @@
 package services
 
 import (
+	"fmt"
 	"log/slog"
 
+	"github.com/AliUmarov/team-find-me-job/internal/gigachat"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
 )
@@ -13,17 +15,20 @@ type ResumeService interface {
 	GetByID(id uint) (*models.Resume, error)
 	Update(id uint, req models.ResumeUpdateRequest) (*models.Resume, error)
 	Delete(id uint) error
+	ImproveResume(id uint) (*models.Resume, error)
 }
 
 type resumeService struct {
 	repo   repository.ResumeRepository
 	logger *slog.Logger
+	client *gigachat.Client
 }
 
-func NewResumeService(repo repository.ResumeRepository, logger *slog.Logger) ResumeService {
+func NewResumeService(repo repository.ResumeRepository, logger *slog.Logger, client *gigachat.Client) ResumeService {
 	return &resumeService{
 		repo:   repo,
 		logger: logger,
+		client: client,
 	}
 }
 
@@ -127,4 +132,34 @@ func (s *resumeService) Delete(id uint) error {
 	}
 
 	return nil
+}
+
+func (s *resumeService) ImproveResume(id uint) (*models.Resume, error) {
+	resume, err := s.repo.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	fullText := fmt.Sprintf(`
+Position: %s
+Summary: %s
+Skills: %s
+Experience: %s
+Portfolio: %s
+Salary: %d
+`, resume.Position, resume.Summary, resume.Skills, resume.Experience, resume.Portfolio, resume.Salary)
+
+	improved, score, err := gigachat.ImproveResume(fullText, s.client)
+	if err != nil {
+		return nil, err
+	}
+
+	resume.AIImproved = improved
+	resume.AIScore = score
+
+	if err := s.repo.Save(resume); err != nil {
+		return nil, err
+	}
+
+	return resume, nil
 }

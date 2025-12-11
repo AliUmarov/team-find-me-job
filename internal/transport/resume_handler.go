@@ -28,6 +28,7 @@ func (h *ResumeHandler) RegisterRoutes(r *gin.Engine) {
 		api.GET("/", h.GetAll)
 		api.PATCH("/:id", h.Update)
 		api.DELETE("/:id", h.Delete)
+		api.POST("/:id/improve", h.Improve)
 	}
 
 	r.POST("/applicants/:id/resumes", h.Create)
@@ -169,4 +170,29 @@ func (h *ResumeHandler) Delete(c *gin.Context) {
 	)
 
 	c.JSON(http.StatusOK, gin.H{"message": "резюме удалено"})
+}
+
+func (h *ResumeHandler) Improve(c *gin.Context) {
+	h.logger.Info("Improve resume request")
+
+	idStr := c.Param("id")
+	idUint, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		h.logger.Warn("некорректный ID", slog.Any("error", err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный ID"})
+		return
+	}
+
+	resume, err := h.service.ImproveResume(uint(idUint))
+	if err != nil {
+		h.logger.Error("ошибка улучшения резюме", slog.Any("error", err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "не удалось улучшить резюме",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	h.logger.Info("резюме улучшено", slog.Uint64("resume_id", uint64(idUint)))
+	c.JSON(http.StatusOK, resume)
 }

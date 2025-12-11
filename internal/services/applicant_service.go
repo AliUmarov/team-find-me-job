@@ -46,9 +46,9 @@ func (s *ApplicantService) Create(applicant *models.CreateApplicant) (*models.Ap
 	}
 
 	createdApplicant := &models.Applicant{
-		FullName:  applicant.FullName,
-		Email: applicant.Email,
-		Phone: applicant.Phone,
+		FullName: applicant.FullName,
+		Email:    applicant.Email,
+		Phone:    applicant.Phone,
 	}
 
 	return s.applicantRepo.Create(createdApplicant)
