@@ -58,7 +58,7 @@ func main() {
 	applicationRepo := repository.NewApplicationRepository(db)
 
 	applicantService := services.NewApplicantService(applicantRepo, log)
-	resumeService := services.NewResumeService(resumeRepo, log, gigaClient)
+	resumeService := services.NewResumeService(resumeRepo, applicantRepo, log, gigaClient)
 	companyService := services.NewCompanyService(companyRepo, vacancyRepo, applicationRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)
 	applicationService := services.NewApplicationService(applicationRepo, vacancyRepo, resumeRepo)
