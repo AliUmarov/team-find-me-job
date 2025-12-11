@@ -20,10 +20,33 @@ func NewCompanyHandler(service services.CompanyService) *CompanyHandler {
 func (h *CompanyHandler) RegisterRoutes(r *gin.Engine) {
 	company := r.Group("/companies")
 	{
+		// company.GET(":id/applications/accept", h.Applications)
+		// company.GET(":id/applications/reject", h.Applications)
+		company.GET(":id/applications", h.Applications)
 		company.GET("", h.List)
 		company.POST("", h.Create)
 		company.GET(":id/vacancies", h.GetVacanciesByCompanyId)
 	}
+}
+
+func (h *CompanyHandler) Applications(c *gin.Context) {
+	var applicationsFilter models.ApplicationFilter
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := c.ShouldBindQuery(&applicationsFilter); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	applications, err := h.service.Applications(uint(id), applicationsFilter)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": applications})
 }
 
 func (h *CompanyHandler) GetVacanciesByCompanyId(c *gin.Context) {
@@ -33,7 +56,7 @@ func (h *CompanyHandler) GetVacanciesByCompanyId(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	companies, err := h.service.GetVacanciesByCompanyId(id)
+	companies, err := h.service.GetVacanciesByCompanyId(uint(id))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

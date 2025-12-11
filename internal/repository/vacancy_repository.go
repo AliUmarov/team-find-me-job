@@ -8,7 +8,8 @@ import (
 type VacancyRepository interface {
 	Search(models.VacancyFilter) ([]models.Vacancy, error)
 	Create(*models.Vacancy) error
-	GetByCompanyId(uint64) ([]models.Vacancy, error)
+	GetByCompanyId(uint) ([]models.Vacancy, error)
+	IsVacancyExists(id uint) (bool, error)
 }
 
 type vacancyRepository struct {
@@ -32,7 +33,7 @@ func (r *vacancyRepository) Search(filter models.VacancyFilter) ([]models.Vacanc
 	return vacancies, nil
 }
 
-func (r *vacancyRepository) GetByCompanyId(id uint64) ([]models.Vacancy, error) {
+func (r *vacancyRepository) GetByCompanyId(id uint) ([]models.Vacancy, error) {
 	var vacancies []models.Vacancy
 
 	if err := r.db.Where("company_id = ?", id).Find(&vacancies).Error; err != nil {
@@ -44,4 +45,13 @@ func (r *vacancyRepository) GetByCompanyId(id uint64) ([]models.Vacancy, error) 
 
 func (r *vacancyRepository) Create(vacancy *models.Vacancy) error {
 	return r.db.Create(&vacancy).Error
+}
+
+func (r *vacancyRepository) IsVacancyExists(id uint) (bool, error) {
+	var count int64
+	if err := r.db.Model(&models.Vacancy{}).Where("id = ?", id).Count(&count).Error; err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }

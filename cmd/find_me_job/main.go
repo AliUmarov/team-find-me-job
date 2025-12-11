@@ -5,21 +5,30 @@ import (
 	"os"
 
 	"github.com/AliUmarov/team-find-me-job/internal/config"
+	"github.com/AliUmarov/team-find-me-job/internal/gigachat"
 	"github.com/AliUmarov/team-find-me-job/internal/middlewares"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
 	"github.com/AliUmarov/team-find-me-job/internal/transport"
+	"github.com/AliUmarov/team-find-me-job/internal/validators"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	log := config.InitLogger()
+	validators.RegisterValidators()
 
 	config.SetEnv(log)
 	db := config.Connect(log)
 
-	if err := db.AutoMigrate(&models.Applicant{}, &models.Application{}, &models.Vacancy{}, &models.Company{}, &models.Resume{}); err != nil {
+	if err := db.AutoMigrate(
+		&models.Applicant{},
+		&models.Application{},
+		&models.Vacancy{},
+		&models.Company{},
+		&models.Resume{},
+	); err != nil {
 		log.Error("failed to migrate database", "error", err)
 		os.Exit(1)
 	}
@@ -31,6 +40,18 @@ func main() {
 		port = "8080"
 	}
 
+	tokenProvider, err := gigachat.NewTokenProvider()
+	if err != nil {
+		log.Error("failed to init GigaChat TokenProvider", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	gigaClient, err := gigachat.NewClient(tokenProvider)
+	if err != nil {
+		log.Error("failed to init GigaChat client", slog.Any("error", err))
+		os.Exit(1)
+	}
+
 	companyRepo := repository.NewCompanyRepository(db)
 	applicantRepo := repository.NewApplicantRepository(db, log)
 	vacancyRepo := repository.NewVacancyRepository(db)
@@ -39,16 +60,18 @@ func main() {
 
 	jwtService := services.NewJWTService()
 	authService := services.NewAuthService(applicantRepo, companyRepo, log, refreshTokenRepo, jwtService, db)
+	applicationRepo := repository.NewApplicationRepository(db)
 
 	applicantService := services.NewApplicantService(applicantRepo, log)
-	resumeService := services.NewResumeService(resumeRepo, log)
-	companyService := services.NewCompanyService(companyRepo, vacancyRepo)
+	resumeService := services.NewResumeService(resumeRepo, log, gigaClient)
+	companyService := services.NewCompanyService(companyRepo, vacancyRepo, applicationRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)
+	applicationService := services.NewApplicationService(applicationRepo, vacancyRepo, resumeRepo)
 
 	r := gin.Default()
 	r.Use(middlewares.CORSMiddleware())
 
-	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService, authService)
+	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService, applicationService, authService)
 
 	log.Info("server started",
 		slog.String("addr", port))

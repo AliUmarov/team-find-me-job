@@ -5,16 +5,16 @@ import "github.com/lib/pq"
 type Vacancy struct {
 	Base
 
-	Title       string  `json:"title" gorm:"type:varchar(255);not null"`
-	Description string  `json:"description" gorm:"type:text;not null"`
-	Salary      int     `json:"salary" gorm:"type:int;not null"`
-	Rating      float64 `json:"rating" gorm:"type:float;not null"`
+	Title            string         `json:"title" gorm:"type:varchar(255);not null"`
+	Description      string         `json:"description" gorm:"type:text;not null"`
+	Salary           int            `json:"salary" gorm:"type:int;not null"`
+	Rating           float64        `json:"rating" gorm:"type:float;not null"`
 	Requirements     pq.StringArray `json:"requirements" gorm:"type:text[];not null"`
 	Responsibilities pq.StringArray `json:"responsibilities" gorm:"type:text[];not null"`
 	NiceToHave       pq.StringArray `json:"nice_to_have" gorm:"type:text[];not null"`
 
-	CompanyID uint `json:"company_id" binding:"required" gorm:"not null"`
-	Company   Company `json:"-"`
+	CompanyID uint    `json:"company_id" binding:"required" gorm:"not null"`
+	Company   *Company `json:"-"`
 }
 
 type VacancyCreateRequest struct {

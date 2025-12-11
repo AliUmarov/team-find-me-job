@@ -6,6 +6,7 @@ import (
 )
 
 type CompanyRepository interface {
+	Get(uint) (*models.Company, error)
 	List() ([]models.Company, error)
 	Create(company *models.Company) error
 }
@@ -16,6 +17,15 @@ type companyRepository struct {
 
 func NewCompanyRepository(db *gorm.DB) CompanyRepository {
 	return &companyRepository{db: db}
+}
+
+func (r *companyRepository) Get(id uint) (*models.Company, error) {
+	var company models.Company
+	if err := r.db.First(&company, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &company, nil
 }
 
 func (r *companyRepository) List() ([]models.Company, error) {

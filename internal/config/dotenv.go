@@ -9,7 +9,7 @@ import (
 
 func SetEnv(logger *slog.Logger) {
 	err := godotenv.Load(".env")
-	
+
 	if err != nil {
 		logger.Error("failed to load .env file", "error", err)
 		os.Exit(1)

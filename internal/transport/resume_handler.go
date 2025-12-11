@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/AliUmarov/team-find-me-job/internal/constants"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
 	"github.com/gin-gonic/gin"
@@ -28,9 +29,10 @@ func (h *ResumeHandler) RegisterRoutes(r *gin.Engine) {
 		api.GET("/", h.GetAll)
 		api.PATCH("/:id", h.Update)
 		api.DELETE("/:id", h.Delete)
+		api.POST("/:id/improve", h.Improve)
 	}
 
-	r.POST("/applicants/:id/resumes", h.Create)
+	r.POST("/applicant/:id/resumes", h.Create)
 }
 
 func (h *ResumeHandler) Create(c *gin.Context) {
@@ -57,7 +59,7 @@ func (h *ResumeHandler) Create(c *gin.Context) {
 			slog.String("path", c.FullPath()),
 			slog.Any("error", err),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INVALID_JSON})
 		return
 	}
 
@@ -66,7 +68,7 @@ func (h *ResumeHandler) Create(c *gin.Context) {
 		h.logger.Error("не удалось создать резюме",
 			slog.Any("error", err),
 		)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "не удалось создать резюме"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.ERR_CAN_NOT_CREATE_RESUME})
 		return
 	}
 
@@ -85,7 +87,7 @@ func (h *ResumeHandler) GetAll(c *gin.Context) {
 		h.logger.Error("не удалось получить список резюме",
 			slog.Any("error", err),
 		)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "не удалось получить список резюме"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.ERR_CAN_NOT_GET_RESUME})
 		return
 	}
 
@@ -104,7 +106,7 @@ func (h *ResumeHandler) Update(c *gin.Context) {
 		h.logger.Error("некорректный ID",
 			slog.Any("error", err),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INVALID_ID})
 		return
 	}
 
@@ -116,7 +118,7 @@ func (h *ResumeHandler) Update(c *gin.Context) {
 			slog.String("path", c.FullPath()),
 			slog.Any("error", err),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный JSON"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INVALID_JSON})
 		return
 	}
 
@@ -128,7 +130,7 @@ func (h *ResumeHandler) Update(c *gin.Context) {
 			slog.Any("error", err),
 		)
 
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "не удалось сохранить изменения"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.ERR_CAN_NOT_UPDATE_RESUME})
 		return
 	}
 
@@ -150,7 +152,7 @@ func (h *ResumeHandler) Delete(c *gin.Context) {
 			slog.String("id", idStr),
 			slog.Any("error", err),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INVALID_ID})
 		return
 	}
 
@@ -160,7 +162,7 @@ func (h *ResumeHandler) Delete(c *gin.Context) {
 			slog.Any("error", err),
 		)
 
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "не удалось удалить резюме"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.ERR_CAN_NOT_DELETE_RESUME})
 		return
 	}
 
@@ -169,4 +171,29 @@ func (h *ResumeHandler) Delete(c *gin.Context) {
 	)
 
 	c.JSON(http.StatusOK, gin.H{"message": "резюме удалено"})
+}
+
+func (h *ResumeHandler) Improve(c *gin.Context) {
+	h.logger.Info("Improve resume request")
+
+	idStr := c.Param("id")
+	idUint, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		h.logger.Warn("некорректный ID", slog.Any("error", err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.ERR_INVALID_ID})
+		return
+	}
+
+	resume, err := h.service.ImproveResume(uint(idUint))
+	if err != nil {
+		h.logger.Error("ошибка улучшения резюме", slog.Any("error", err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "не удалось улучшить резюме",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	h.logger.Info("резюме улучшено", slog.Uint64("resume_id", uint64(idUint)))
+	c.JSON(http.StatusOK, resume)
 }
