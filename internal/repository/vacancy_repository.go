@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"strings"
+
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"gorm.io/gorm"
 )
@@ -23,8 +25,11 @@ func NewVacancyRepository(db *gorm.DB) VacancyRepository {
 func (r *vacancyRepository) Search(filter models.VacancyFilter) ([]models.Vacancy, error) {
 	var vacancies []models.Vacancy
 	query := r.db.Model(&models.Vacancy{})
+
+	title := strings.ReplaceAll(*filter.Title, "%", "\\%")
+	title = strings.ReplaceAll(title, "_", "\\_")
 	if filter.Title != nil {
-		query = query.Where("title ILIKE ?", "%"+*filter.Title+"%")
+		query = query.Where("title ILIKE ? ESCAPE '\\'", "%"+title+"%")
 	}
 	if err := query.Find(&vacancies).Error; err != nil {
 		return nil, err

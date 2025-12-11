@@ -20,13 +20,53 @@ func NewCompanyHandler(service services.CompanyService) *CompanyHandler {
 func (h *CompanyHandler) RegisterRoutes(r *gin.Engine) {
 	company := r.Group("/companies")
 	{
-		// company.GET(":id/applications/accept", h.Applications)
-		// company.GET(":id/applications/reject", h.Applications)
+		company.GET(":id/applications/:app/accept", h.AcceptApplication)
+		company.GET(":id/applications/:app/reject", h.RejectApplication)
 		company.GET(":id/applications", h.Applications)
 		company.GET("", h.List)
 		company.POST("", h.Create)
 		company.GET(":id/vacancies", h.GetVacanciesByCompanyId)
 	}
+}
+
+func (h *CompanyHandler) RejectApplication(c *gin.Context) {
+	idStr := c.Param("id")
+	appStr := c.Param("app")
+	companyId, err1 := strconv.ParseUint(appStr, 10, 64)
+	appId, err2 := strconv.ParseUint(idStr, 10, 64)
+	if err1 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
+		return
+	}
+	if err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err2.Error()})
+		return
+	}
+	if err := h.service.RejectApplication(uint(companyId), uint(appId)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+func (h *CompanyHandler) AcceptApplication(c *gin.Context) {
+	idStr := c.Param("id")
+	appStr := c.Param("app")
+	companyId, err1 := strconv.ParseUint(appStr, 10, 64)
+	appId, err2 := strconv.ParseUint(idStr, 10, 64)
+	if err1 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
+		return
+	}
+	if err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err2.Error()})
+		return
+	}
+	if err := h.service.AcceptApplication(uint(companyId), uint(appId)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 func (h *CompanyHandler) Applications(c *gin.Context) {
