@@ -7,27 +7,29 @@ import (
 
 	"github.com/AliUmarov/team-find-me-job/internal/constants"
 	"github.com/AliUmarov/team-find-me-job/internal/dto"
+	"github.com/AliUmarov/team-find-me-job/internal/middlewares"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
 type ApplicantHandler struct {
-	service services.ApplicantService
-	logger  *slog.Logger
+	service     services.ApplicantService
+	authService services.AuthService
+	logger      *slog.Logger
 }
 
-func NewApplicantHandler(service services.ApplicantService, logger *slog.Logger) *ApplicantHandler {
-	return &ApplicantHandler{service: service, logger: logger}
+func NewApplicantHandler(service services.ApplicantService, authService services.AuthService, logger *slog.Logger) *ApplicantHandler {
+	return &ApplicantHandler{service: service, authService: authService, logger: logger}
 }
 
 func (h *ApplicantHandler) RegisterRoutes(r *gin.Engine) {
+	jwtService := h.authService.GetJWTService()
 	applicant := r.Group("/applicant")
 	{
 		applicant.GET("", h.List)
-		applicant.POST("", h.Create)
-		applicant.GET("/:id", h.GetByID)
-		applicant.PUT("/:id", h.Update)
-		applicant.DELETE("/:id", h.Delete)
+		applicant.GET("/:id", middlewares.Authenticate(*jwtService), h.GetByID)
+		applicant.PUT("/:id", middlewares.Authenticate(*jwtService), h.Update)
+		applicant.DELETE("/:id", middlewares.Authenticate(*jwtService), h.Delete)
 	}
 }
 

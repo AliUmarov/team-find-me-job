@@ -27,6 +27,12 @@ func Connect(logger *slog.Logger) *gorm.DB {
 		os.Exit(1)
 	}
 
+	// Включаем расширение для генерации UUID в Postgres
+	if err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error; err != nil {
+		logger.Error("failed to connect", "error", err)
+		os.Exit(1)
+	}
+
 	logger.Info("connected to database")
 
 	return db

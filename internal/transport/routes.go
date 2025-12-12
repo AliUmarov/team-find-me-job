@@ -21,7 +21,7 @@ func RegisterRoutes(
 
 	companyHandler := NewCompanyHandler(companyService)
 	resumeHandler := NewResumeHandler(resumeService, logger)
-	applicantHandler := NewApplicantHandler(applicantService, logger)
+	applicantHandler := NewApplicantHandler(applicantService, authService, logger)
 	vacancyHandler := NewVacancyHandler(vacancyService)
 	applicationHandler := NewApplicationHandler(applicationService)
 

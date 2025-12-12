@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/AliUmarov/team-find-me-job/internal/constants"
@@ -23,6 +24,7 @@ type AuthService interface {
 	VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) (dto.VerifyEmailResponse, error)
 	SendPasswordReset(ctx context.Context, req dto.SendPasswordResetRequest) error
 	ResetPassword(ctx context.Context, req dto.ResetPasswordRequest) error
+	GetJWTService() *JWTService
 }
 
 type authService struct {
@@ -96,6 +98,7 @@ func (s *authService) Login(ctx context.Context, req dto.ApplicantLoginRequest) 
 
 	isValid, err := helpers.CheckPassword(user.Password, []byte(req.Password))
 	if err != nil || !isValid {
+
 		return dto.TokenResponse{}, constants.ErrInvalidCredentials
 	}
 
@@ -235,15 +238,20 @@ func (s *authService) ResetPassword(ctx context.Context, req dto.ResetPasswordRe
 	}
 
 	hashedPassword, err := helpers.HashPassword(req.NewPassword)
+	fmt.Println(hashedPassword)
 	if err != nil {
 		return err
 	}
 
-	user.Password = hashedPassword
+	// user.Password = hashedPassword
 	_, err = s.applicantRepo.Update(userId, user)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (s *authService) GetJWTService() *JWTService {
+	return &s.jwtService
 }

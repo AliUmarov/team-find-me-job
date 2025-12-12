@@ -56,14 +56,14 @@ func (s *ApplicantService) Create(applicant *dto.CreateApplicant) (*models.Appli
 	return s.applicantRepo.Create(createdApplicant)
 }
 
-func (s *ApplicantService) GetByID(id uint) (*models.Applicant, error) {
+func (s *ApplicantService) GetByID(id uint) (*dto.ApplicantResponse, error) {
 	applicant, err := s.applicantRepo.GetByID(id)
 	if err != nil {
 		s.logger.Error("ошибка при получении соискателя по ID",
 			slog.Uint64("id", uint64(id)),
 			slog.String("error", err.Error()),
 		)
-		return &models.Applicant{}, err
+		return &dto.ApplicantResponse{}, err
 	}
 	return applicant, nil
 }
@@ -78,17 +78,16 @@ func (s *ApplicantService) Update(id uint, updApplicant dto.UpdateApplicant) (*m
 		return &models.Applicant{}, err
 	}
 
-
-    // Применяем только те поля, которые пришли
-    if updApplicant.FullName != nil {
-        existing.FullName = *updApplicant.FullName
-    }
-    if updApplicant.Email != nil {
-        existing.Email = *updApplicant.Email
-    }
-    if updApplicant.Phone != nil {
-        existing.Phone = *updApplicant.Phone
-    }
+	// Применяем только те поля, которые пришли
+	if updApplicant.FullName != nil {
+		existing.FullName = *updApplicant.FullName
+	}
+	if updApplicant.Email != nil {
+		existing.Email = *updApplicant.Email
+	}
+	if updApplicant.Phone != nil {
+		existing.Phone = *updApplicant.Phone
+	}
 
 	updatedApplicant, err := s.applicantRepo.Update(id, existing)
 	if err != nil {
@@ -98,7 +97,7 @@ func (s *ApplicantService) Update(id uint, updApplicant dto.UpdateApplicant) (*m
 		)
 		return &models.Applicant{}, err
 	}
-	
+
 	return updatedApplicant, nil
 }
 

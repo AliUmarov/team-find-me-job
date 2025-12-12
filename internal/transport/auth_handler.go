@@ -19,7 +19,7 @@ type AuthHandler struct {
 }
 
 func (h *AuthHandler) RegisterRoutes(r *gin.Engine) {
-	authRoutes := r.Group("/api/auth")
+	authRoutes := r.Group("/auth")
 	{
 		authRoutes.POST("/register", h.Register)
 		authRoutes.POST("/login", h.Login)
@@ -44,7 +44,8 @@ func NewAuthHandler(service services.AuthService, logger *slog.Logger) *AuthHand
 func (h *AuthHandler) Register(ctx *gin.Context) {
 	var req dto.ApplicantRegisterRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": constants.MESSAGE_FAILED_GET_DATA_FROM_BODY})
+		res := utils.BuildResponseFailed(constants.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
