@@ -12,6 +12,7 @@ type ApplicantServiceInterface interface {
 	GetByID(id uint) (models.Applicant, error)
 	Update(id uint, applicant models.UpdateApplicant) (models.Applicant, error)
 	Delete(id uint) error
+	List() ([]models.Applicant, error)
 }
 
 type ApplicantService struct {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/AliUmarov/team-find-me-job/internal/services"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func RegisterRoutes(
@@ -15,6 +16,7 @@ func RegisterRoutes(
 	resumeService services.ResumeService,
 	vacancyService services.VacancyService,
 	applicationService services.ApplicationService,
+	db *gorm.DB,
 ) {
 	companyHandler := NewCompanyHandler(companyService)
 	resumeHandler := NewResumeHandler(resumeService, logger)

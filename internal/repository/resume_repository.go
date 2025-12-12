@@ -15,6 +15,7 @@ type ResumeRepository interface {
 	Update(id uint, resume *models.Resume) error
 	Delete(id uint) error
 	IsResumeExists(id uint) (bool, error)
+	WithDb(db *gorm.DB) ResumeRepository
 }
 
 type gormResumeRepository struct {
@@ -26,6 +27,13 @@ func NewResumeRepository(db *gorm.DB, logger *slog.Logger) ResumeRepository {
 	return &gormResumeRepository{
 		db:     db,
 		logger: logger,
+	}
+}
+
+func (r *gormResumeRepository) WithDb(db *gorm.DB) ResumeRepository {
+	return &gormResumeRepository{
+		db:     db,
+		logger: r.logger,
 	}
 }
 

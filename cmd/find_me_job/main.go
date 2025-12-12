@@ -61,11 +61,11 @@ func main() {
 	resumeService := services.NewResumeService(resumeRepo, log, gigaClient)
 	companyService := services.NewCompanyService(companyRepo, vacancyRepo, applicationRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)
-	applicationService := services.NewApplicationService(applicationRepo, vacancyRepo, resumeRepo)
+	applicationService := services.NewApplicationService(applicationRepo, vacancyRepo, resumeRepo, db)
 
 	r := gin.Default()
 
-	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService, applicationService)
+	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService, applicationService, db)
 
 	log.Info("server started",
 		slog.String("addr", port))

@@ -30,10 +30,10 @@ func (h *CompanyHandler) RegisterRoutes(r *gin.Engine) {
 }
 
 func (h *CompanyHandler) RejectApplication(c *gin.Context) {
-	idStr := c.Param("id")
+	companyStr := c.Param("id")
 	appStr := c.Param("app")
-	companyId, err1 := strconv.ParseUint(appStr, 10, 64)
-	appId, err2 := strconv.ParseUint(idStr, 10, 64)
+	companyId, err1 := strconv.ParseUint(companyStr, 10, 64)
+	appId, err2 := strconv.ParseUint(appStr, 10, 64)
 	if err1 != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
 		return
@@ -52,8 +52,8 @@ func (h *CompanyHandler) RejectApplication(c *gin.Context) {
 func (h *CompanyHandler) AcceptApplication(c *gin.Context) {
 	idStr := c.Param("id")
 	appStr := c.Param("app")
-	companyId, err1 := strconv.ParseUint(appStr, 10, 64)
-	appId, err2 := strconv.ParseUint(idStr, 10, 64)
+	companyId, err1 := strconv.ParseUint(idStr, 10, 64)
+	appId, err2 := strconv.ParseUint(appStr, 10, 64)
 	if err1 != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
 		return

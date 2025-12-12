@@ -14,8 +14,8 @@ type Application struct {
 
 	Status ApplicationStatus `json:"status" gorm:"type:varchar(100);not null;default:'pending'"`
 
-	VacancyID uint `json:"vacancy_id" gorm:"not null"`
-	ResumeID  uint `json:"resume_id" gorm:"not null"`
+	VacancyID uint `json:"vacancy_id" gorm:"not null;index:idx_vacancy_resume,unique"`
+	ResumeID  uint `json:"resume_id" gorm:"not null;index:idx_vacancy_resume,unique"`
 
 	Vacancy *Vacancy `json:"vacancy,omitempty" gorm:"foreignKey:VacancyID"`
 	Resume  *Resume  `json:"resume,omitempty" gorm:"foreignKey:ResumeID"`

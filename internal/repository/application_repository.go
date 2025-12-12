@@ -10,6 +10,7 @@ type ApplicationRepository interface {
 	Applications(uint, models.ApplicationFilter) ([]models.Application, error)
 	AcceptApplication(appId uint) error
 	RejectApplication(appId uint) error
+	WithDb(db *gorm.DB) ApplicationRepository
 }
 
 type applicationRepository struct {
@@ -18,6 +19,12 @@ type applicationRepository struct {
 
 func NewApplicationRepository(db *gorm.DB) ApplicationRepository {
 	return &applicationRepository{db: db}
+}
+
+func (r *applicationRepository) WithDb(db *gorm.DB) ApplicationRepository {
+	return &applicationRepository{
+		db: db,
+	}
 }
 
 func (r *applicationRepository) RejectApplication(appId uint) error {

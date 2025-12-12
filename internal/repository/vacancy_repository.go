@@ -12,6 +12,7 @@ type VacancyRepository interface {
 	Create(*models.Vacancy) error
 	GetByCompanyId(uint) ([]models.Vacancy, error)
 	IsVacancyExists(id uint) (bool, error)
+	WithDb(*gorm.DB) VacancyRepository
 }
 
 type vacancyRepository struct {
@@ -22,13 +23,17 @@ func NewVacancyRepository(db *gorm.DB) VacancyRepository {
 	return &vacancyRepository{db: db}
 }
 
+func (r *vacancyRepository) WithDb(db *gorm.DB) VacancyRepository {
+	return &vacancyRepository{db: db}
+}
+
 func (r *vacancyRepository) Search(filter models.VacancyFilter) ([]models.Vacancy, error) {
 	var vacancies []models.Vacancy
 	query := r.db.Model(&models.Vacancy{})
 
-	title := strings.ReplaceAll(*filter.Title, "%", "\\%")
-	title = strings.ReplaceAll(title, "_", "\\_")
 	if filter.Title != nil {
+		title := strings.ReplaceAll(*filter.Title, "%", "\\%")
+		title = strings.ReplaceAll(title, "_", "\\_")
 		query = query.Where("title ILIKE ? ESCAPE '\\'", "%"+title+"%")
 	}
 	if err := query.Find(&vacancies).Error; err != nil {

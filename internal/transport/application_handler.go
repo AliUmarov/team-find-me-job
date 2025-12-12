@@ -29,10 +29,10 @@ func (h *ApplicationHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	application, err := h.service.Create(req)
+	err := h.service.Create(req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"data": application})
+	c.JSON(http.StatusCreated, gin.H{"status": "success"})
 }
