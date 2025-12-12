@@ -12,7 +12,7 @@ import (
 type ApplicantRepositoryInterface interface {
 	List() ([]models.Applicant, error)
 	Create(applicant *models.Applicant) (*models.Applicant, error)
-	GetByID(id uint) (*models.Applicant, error)
+	GetByID(id uint) (*dto.ApplicantResponse, error)
 	Update(id uint, applicant *dto.UpdateApplicant) (*models.Applicant, error)
 	Delete(id uint) error
 }
@@ -59,23 +59,33 @@ func (r *ApplicantRepository) Create(applicant *models.Applicant) (*models.Appli
 	return applicant, nil
 }
 
-func (r *ApplicantRepository) GetByID(id uint) (*models.Applicant, error) {
+func (r *ApplicantRepository) GetByID(id uint) (*dto.ApplicantResponse, error) {
 	var applicant models.Applicant
 	if err := r.db.Model(&applicant).First(&applicant, id).Error; err != nil {
 		r.logger.Error("не удалось получить соискателя",
 			slog.Uint64("id", uint64(id)),
 			slog.String("error", err.Error()),
 		)
-		return &models.Applicant{}, err
+		return &dto.ApplicantResponse{}, err
 	}
+
+	resp := dto.ApplicantResponse{
+		Base:       applicant.Base,
+		FullName:   applicant.FullName,
+		Email:      applicant.Email,
+		Phone:      applicant.Phone,
+		Role:       applicant.Role,
+		IsVerified: applicant.IsVerified,
+	}
+
 	r.logger.Info("соискатель успешно получен",
 		slog.Uint64("id", uint64(applicant.ID)),
 		slog.String("full_name", applicant.FullName),
 	)
-	return &applicant, nil
+	return &resp, nil
 }
 
-func (r *ApplicantRepository) Update(id uint, applicant *models.Applicant) (*models.Applicant, error) {
+func (r *ApplicantRepository) Update(id uint, applicant *dto.ApplicantResponse) (*models.Applicant, error) {
 	if err := r.db.Model(&models.Applicant{}).Where("id = ?", id).Updates(&applicant).Error; err != nil {
 		r.logger.Error("не удалось обновить соискателя",
 			slog.Uint64("id", uint64(id)),

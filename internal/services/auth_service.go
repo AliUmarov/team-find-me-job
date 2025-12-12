@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/AliUmarov/team-find-me-job/internal/constants"
@@ -237,11 +238,12 @@ func (s *authService) ResetPassword(ctx context.Context, req dto.ResetPasswordRe
 	}
 
 	hashedPassword, err := helpers.HashPassword(req.NewPassword)
+	fmt.Println(hashedPassword)
 	if err != nil {
 		return err
 	}
 
-	user.Password = hashedPassword
+	// user.Password = hashedPassword
 	_, err = s.applicantRepo.Update(userId, user)
 	if err != nil {
 		return err
