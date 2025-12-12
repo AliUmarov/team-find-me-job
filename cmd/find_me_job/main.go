@@ -6,6 +6,7 @@ import (
 
 	"github.com/AliUmarov/team-find-me-job/internal/config"
 	"github.com/AliUmarov/team-find-me-job/internal/gigachat"
+	"github.com/AliUmarov/team-find-me-job/internal/middlewares"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
@@ -22,11 +23,11 @@ func main() {
 	db := config.Connect(log)
 
 	if err := db.AutoMigrate(
+		&models.Company{},
+		&models.Vacancy{},
+		&models.Resume{},
 		&models.Applicant{},
 		&models.Application{},
-		&models.Vacancy{},
-		&models.Company{},
-		&models.Resume{},
 	); err != nil {
 		log.Error("failed to migrate database", "error", err)
 		os.Exit(1)
@@ -55,17 +56,22 @@ func main() {
 	applicantRepo := repository.NewApplicantRepository(db, log)
 	vacancyRepo := repository.NewVacancyRepository(db)
 	resumeRepo := repository.NewResumeRepository(db, log)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
+
+	jwtService := services.NewJWTService()
+	authService := services.NewAuthService(applicantRepo, companyRepo, log, refreshTokenRepo, jwtService, db)
 	applicationRepo := repository.NewApplicationRepository(db)
 
 	applicantService := services.NewApplicantService(applicantRepo, log)
-	resumeService := services.NewResumeService(resumeRepo, log, gigaClient)
+	resumeService := services.NewResumeService(resumeRepo, applicantRepo, log, gigaClient)
 	companyService := services.NewCompanyService(companyRepo, vacancyRepo, applicationRepo)
 	vacancyService := services.NewVacancyService(vacancyRepo)
 	applicationService := services.NewApplicationService(applicationRepo, vacancyRepo, resumeRepo, db)
 
 	r := gin.Default()
+	r.Use(middlewares.CORSMiddleware())
 
-	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService, applicationService, db)
+	transport.RegisterRoutes(r, log, companyService, applicantService, resumeService, vacancyService, applicationService, authService, db)
 
 	log.Info("server started",
 		slog.String("addr", port))

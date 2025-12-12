@@ -17,3 +17,11 @@ type CompanyCreateRequest struct {
 	Description string `json:"description"`
 	Website     string `json:"website"`
 }
+
+type CompanyRegisterRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Website     string `json:"website"`
+	Email       string `json:"email" binding:"required,email"`
+	Password    string `json:"password" binding:"required,min=8"`
+}

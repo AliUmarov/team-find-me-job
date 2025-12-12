@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 )
 
@@ -51,7 +52,11 @@ func (c *Client) send(payload any) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ошибка запроса к GigaChat: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			slog.Error("failed to close response body", slog.Any("error", err))
+		}
+	}()
 
 	respBytes, _ := io.ReadAll(resp.Body)
 

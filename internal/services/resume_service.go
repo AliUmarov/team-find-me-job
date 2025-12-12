@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/AliUmarov/team-find-me-job/internal/constants"
 	"github.com/AliUmarov/team-find-me-job/internal/gigachat"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"github.com/AliUmarov/team-find-me-job/internal/repository"
@@ -19,20 +20,27 @@ type ResumeService interface {
 }
 
 type resumeService struct {
-	repo   repository.ResumeRepository
-	logger *slog.Logger
-	client *gigachat.Client
+	repo          repository.ResumeRepository
+	applicantRepo repository.ApplicantRepository
+	logger        *slog.Logger
+	client        *gigachat.Client
 }
 
-func NewResumeService(repo repository.ResumeRepository, logger *slog.Logger, client *gigachat.Client) ResumeService {
+func NewResumeService(repo repository.ResumeRepository, applicantRepo repository.ApplicantRepository, logger *slog.Logger, client *gigachat.Client) ResumeService {
 	return &resumeService{
-		repo:   repo,
-		logger: logger,
-		client: client,
+		repo:          repo,
+		applicantRepo: applicantRepo,
+		logger:        logger,
+		client:        client,
 	}
 }
 
 func (s *resumeService) Create(id uint, req models.ResumeCreateRequest) (*models.Resume, error) {
+	applicant, err := s.applicantRepo.GetByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("error: %v, details: %v", err, constants.ERR_CAN_NOT_GET_APPLICANT)
+	}
+
 	var resume = models.Resume{
 		Position:    req.Position,
 		Summary:     req.Summary,
@@ -40,7 +48,7 @@ func (s *resumeService) Create(id uint, req models.ResumeCreateRequest) (*models
 		Experience:  req.Experience,
 		Portfolio:   req.Portfolio,
 		Salary:      req.Salary,
-		ApplicantID: id,
+		ApplicantID: applicant.ID,
 	}
 
 	if err := s.repo.Create(&resume); err != nil {
@@ -141,13 +149,14 @@ func (s *resumeService) ImproveResume(id uint) (*models.Resume, error) {
 	}
 
 	fullText := fmt.Sprintf(`
-Position: %s
-Summary: %s
-Skills: %s
-Experience: %s
-Portfolio: %s
-Salary: %d
-`, resume.Position, resume.Summary, resume.Skills, resume.Experience, resume.Portfolio, resume.Salary)
+		Position: %s
+		Summary: %s
+		Skills: %s
+		Experience: %s
+		Portfolio: %s 
+
+		Salary: %d
+	`, resume.Position, resume.Summary, resume.Skills, resume.Experience, resume.Portfolio, resume.Salary)
 
 	improved, score, err := gigachat.ImproveResume(fullText, s.client)
 	if err != nil {

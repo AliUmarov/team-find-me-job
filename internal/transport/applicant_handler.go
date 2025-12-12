@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/AliUmarov/team-find-me-job/internal/constants"
-	"github.com/AliUmarov/team-find-me-job/internal/models"
+	"github.com/AliUmarov/team-find-me-job/internal/dto"
 	"github.com/AliUmarov/team-find-me-job/internal/services"
 	"github.com/gin-gonic/gin"
 )
@@ -49,7 +49,7 @@ func (h *ApplicantHandler) List(c *gin.Context) {
 }
 
 func (h *ApplicantHandler) Create(c *gin.Context) {
-	var req models.CreateApplicant
+	var req dto.CreateApplicant
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("некорректный JSON",
 			slog.String("method", c.Request.Method),
@@ -112,7 +112,7 @@ func (h *ApplicantHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var req models.UpdateApplicant
+	var req dto.UpdateApplicant
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("некорректный JSON",
 			slog.String("method", c.Request.Method),

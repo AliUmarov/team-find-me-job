@@ -5,16 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
-)
-
-const (
-	authURL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
-	authKey = "MDE5YjAyZDktZDJjMC03ZjAwLTk4YzUtY2ZkYzMzYzdiY2NkOjI0NWJiNTMyLWJiYzctNDhhOS05ZGQ2LWU1NzY3YTcwNzFiYg=="
 )
 
 type tokenResponse struct {
@@ -53,6 +50,9 @@ func NewTokenProvider() (*TokenProvider, error) {
 }
 
 func (p *TokenProvider) refresh() error {
+	authURL := os.Getenv("GIGACHAT_AUTH_URL")
+	authKEY := os.Getenv("GIGACHAT_AUTH_KEY")
+
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
@@ -63,7 +63,7 @@ func (p *TokenProvider) refresh() error {
 		return err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+authKey)
+	req.Header.Set("Authorization", "Bearer "+authKEY)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("RqUID", uuid.New().String())
@@ -72,7 +72,11 @@ func (p *TokenProvider) refresh() error {
 	if err != nil {
 		return fmt.Errorf("ошибка запроса токена: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			slog.Error("failed to close response body", slog.Any("error", err))
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(resp.Body)
