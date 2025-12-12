@@ -28,6 +28,7 @@ func main() {
 		&models.Resume{},
 		&models.Applicant{},
 		&models.Application{},
+		&models.RefreshToken{},
 	); err != nil {
 		log.Error("failed to migrate database", "error", err)
 		os.Exit(1)

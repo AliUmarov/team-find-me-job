@@ -109,29 +109,29 @@ func (r *ApplicantRepository) Delete(id uint) error {
 	return r.db.Model(&models.Applicant{}).Where("id = ?", id).Delete(&models.Applicant{}).Error
 }
 
-func (r *ApplicantRepository) Register(ctx context.Context, tx *gorm.DB, user models.Applicant) (models.Applicant, error) {
+func (r *ApplicantRepository) Register(ctx context.Context, tx *gorm.DB, user models.Applicant) (*models.Applicant, error) {
 	if tx == nil {
 		tx = r.db
 	}
 
 	if err := tx.WithContext(ctx).Create(&user).Error; err != nil {
-		return models.Applicant{}, err
+		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
-func (r *ApplicantRepository) GetApplicantByEmail(ctx context.Context, tx *gorm.DB, email string) (models.Applicant, error) {
+func (r *ApplicantRepository) GetApplicantByEmail(ctx context.Context, tx *gorm.DB, email string) (*models.Applicant, error) {
 	if tx == nil {
 		tx = r.db
 	}
 
 	var user models.Applicant
 	if err := tx.WithContext(ctx).Where("email = ?", email).Take(&user).Error; err != nil {
-		return models.Applicant{}, err
+		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 func (r *ApplicantRepository) CheckEmail(ctx context.Context, tx *gorm.DB, email string) (models.Applicant, bool, error) {
