@@ -1,8 +1,10 @@
 package repository
 
 import (
+	"context"
 	"log/slog"
 
+	"github.com/AliUmarov/team-find-me-job/internal/dto"
 	"github.com/AliUmarov/team-find-me-job/internal/models"
 	"gorm.io/gorm"
 )
@@ -11,7 +13,7 @@ type ApplicantRepositoryInterface interface {
 	List() ([]models.Applicant, error)
 	Create(applicant *models.Applicant) (*models.Applicant, error)
 	GetByID(id uint) (*models.Applicant, error)
-	Update(id uint, applicant *models.UpdateApplicant) (*models.Applicant, error)
+	Update(id uint, applicant *dto.UpdateApplicant) (*models.Applicant, error)
 	Delete(id uint) error
 }
 
@@ -73,7 +75,7 @@ func (r *ApplicantRepository) GetByID(id uint) (*models.Applicant, error) {
 	return &applicant, nil
 }
 
-func (r *ApplicantRepository) Update(id uint, applicant *models.UpdateApplicant) (*models.Applicant, error) {
+func (r *ApplicantRepository) Update(id uint, applicant *models.Applicant) (*models.Applicant, error) {
 	if err := r.db.Model(&models.Applicant{}).Where("id = ?", id).Updates(&applicant).Error; err != nil {
 		r.logger.Error("не удалось обновить соискателя",
 			slog.Uint64("id", uint64(id)),
@@ -105,4 +107,42 @@ func (r *ApplicantRepository) Delete(id uint) error {
 		slog.Uint64("id", uint64(id)),
 	)
 	return r.db.Model(&models.Applicant{}).Where("id = ?", id).Delete(&models.Applicant{}).Error
+}
+
+func (r *ApplicantRepository) Register(ctx context.Context, tx *gorm.DB, user models.Applicant) (models.Applicant, error) {
+	if tx == nil {
+		tx = r.db
+	}
+
+	if err := tx.WithContext(ctx).Create(&user).Error; err != nil {
+		return models.Applicant{}, err
+	}
+
+	return user, nil
+}
+
+func (r *ApplicantRepository) GetApplicantByEmail(ctx context.Context, tx *gorm.DB, email string) (models.Applicant, error) {
+	if tx == nil {
+		tx = r.db
+	}
+
+	var user models.Applicant
+	if err := tx.WithContext(ctx).Where("email = ?", email).Take(&user).Error; err != nil {
+		return models.Applicant{}, err
+	}
+
+	return user, nil
+}
+
+func (r *ApplicantRepository) CheckEmail(ctx context.Context, tx *gorm.DB, email string) (models.Applicant, bool, error) {
+	if tx == nil {
+		tx = r.db
+	}
+
+	var user models.Applicant
+	if err := tx.WithContext(ctx).Where("email = ?", email).Take(&user).Error; err != nil {
+		return models.Applicant{}, false, err
+	}
+
+	return user, true, nil
 }
